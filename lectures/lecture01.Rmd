@@ -102,15 +102,15 @@ R is a *statistical programming language*:
 * If there are **conflicts**, git will let you know and make you resolve them.
 * If you ever need to see what changed, you have the entire **history** of all changes to look at.
 
-### To get the latest lecture notes, you have to periodically execute a `git pull` to get the updates.
+### To get the latest lecture notes/labs, you have to periodically execute a `git pull` to get the updates.
 
 ## Using our Posit Cloud
 
-In this course, all lectures, homework and labs will be run using Posit Cloud. 
+In this course, you may use Posit Cloud to run all lectures, homework and labs. 
 
 Alternative environments include:
 
-* [Colab](https://colab.research.google.com/notebook#create=true&language=r)
+* <a href='https://colab.research.google.com/notebook#create=true&language=r' target = "_blank"> Colab </a>
 * RStudio on your local machine. Download RStudio from here:https://posit.co/download/rstudio-desktop/
 * From R terminal after you download R:https://cran.rstudio.com/
 
@@ -206,9 +206,22 @@ To get lecture/lab updates after a copy is made, please run `git pull` on your c
 
 All homework, labs, and lectures are **RMarkdown** documents.
 
+## What is markdown?
+
+* Markdown files are **plain text** files that have special tags for interpretation.
+* They have a header (denoted by `---`) and a body. We can **render** them to HTML to view in any web browser.
+* See the "Help -> Markdown Quick Ref" in RStudio for more details.
+
+## RMarkdown
+
+* RMarkdown extends basic markdown to allow embedding R code within the document.
+* Blend **code** a.k.a.  **chunks** and **presentation**.
+* When you **knit** the document, first the code is evaluated, then the results are added to the markdown document. Then that is turned into a web page.
+* In addition to text and numeric output, plots and graphs are automatically inserted into the output.
+* There are options to control how chunks are presented, cache computations to speed up knitting, etc.
+
 ## RMarkdown documents
 
-RMarkdown documents blend **code** and **presentation**. 
 
 General workflow:
 
@@ -219,19 +232,7 @@ General workflow:
 * (Homework/projects) submit PDF files on Gradescope for homework
 
 
-## What is markdown?
 
-* Markdown files are **plain text** files that have special tags for interpretation.
-* They have a header (denoted by `---`) and a body. We can **render** them to HTML to view in any web browser.
-* See the "Help -> Markdown Quick Ref" in RStudio for more details.
-
-## RMarkdown
-
-* RMarkdown extends basic markdown to allow embedding R code within the document.
-* It addition to formatting text, you can include code **chunks**.
-* When you **knit** the document, first the code is evaluated, then the results are added to the markdown document. Then that is turned into a web page.
-* In addition to text and numeric output, plots and graphs are automatically inserted into the output.
-* There are options to control how chunks are presented, cache computations to speed up knitting, etc.
 
 ## Chunks in Rmd files
 
