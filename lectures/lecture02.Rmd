@@ -50,7 +50,7 @@ print(b)
 
 ```{r}
 circle_radius <- 5
-circle_area <- pi * circle_radius^2
+circle_area <- pi * circle_radius ^ 2
 print(paste("The area of the circle is:", circle_area))
 ```
 
@@ -282,6 +282,7 @@ Lists are heterogeneous while vectors are homogeneous
 ```{r}
 mixed_type_list <- list(3, 4, phone_digits)
 mixed_type_list
+print(length(mixed_type_list))
 list("umich", 1, T)
 c("umich", 1, T)
 ```
@@ -484,8 +485,5 @@ To find how many missing values are present in the category column
 is.na(storms$category) |> table()
 ```
 
-## homework
-
-Every homework will be released as a separate posit project. Be sure to first make a permanent copy of the project before you start working on it. 
 
 

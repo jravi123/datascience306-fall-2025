@@ -283,6 +283,7 @@ Commands that change the **state** of the program are called **statements**, suc
 
 ```{r}
 a <- 3 + 4
+a
 ```
 
 Note: You can also use `=` in the above expression like `a = 3 + 4`. However, the recommended style from [tidyverse](https://style.tidyverse.org/syntax.html?q=assignment#assignment-1) and Hadley(http://adv-r.had.co.nz/Style.html) is `<-` for assignments
