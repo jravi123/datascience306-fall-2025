@@ -330,12 +330,17 @@ An extremely common mistake for beginner programmers is to confuse = and == ("do
 
 ## Boolean operations
 
-Logical expressions are combined using boolean operations. The basic boolean operations are and, or, and not, denoted &, | and ! respectively.
+Logical expressions are combined using boolean operations. The basic boolean operations are `and`, `or`, and `not`, denoted &, | and ! respectively.
 
 ```{r}
 ! FALSE
 FALSE | TRUE
 ! TRUE
+TRUE & TRUE
+```
+
+```{r}
+(5 > 2) & (1 == 0) 
 ```
 
 R abbreviates TRUE and FALSE as T and F
