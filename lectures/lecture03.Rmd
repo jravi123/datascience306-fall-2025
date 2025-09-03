@@ -156,7 +156,7 @@ mpg |> ggplot() + geom_point(aes(x = displ, y = hwy, color = cyl))
 Using `factor()` tells ggplot2 to treat cyl as distinct categories, assigning a unique color to each one, which is exactly what you want.
 
 ```{r}
-mpg |> ggplot() + geom_point(aes(x = displ, y = hwy, color = factor(cyl)))
+mpg |> ggplot() + geom_point(aes(x = displ, y = hwy, color = factor(cyl))) + labs(title = 'Dipl vs hwy', color = 'cyl')
 
 ```
 
@@ -240,7 +240,7 @@ ggplot(data = mpg, aes(x = displ, y = hwy)) +
 
 ## Other geometries
 
-Points are great for graphing two **quantitative** or **continuous** variables.
+Scatter plots are great for graphing two **quantitative** or **continuous** variables.
 For **discrete** or **qualitative** we need other charts.
 
 ```{r}
@@ -319,6 +319,8 @@ ggplot(data = mpg, aes(x = displ)) +
 ```
 
 We'll see a better way to make this table when we talk about tall vs. wide format data.
+
+`lty` specifies the line-type; 1 being a solid line and 2 being a dashed line
 
 ## Overriding defaults of `stat` functions
 
