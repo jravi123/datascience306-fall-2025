@@ -24,11 +24,11 @@ library(ggforce)    # For hurricane map, later.
 
 ## Facets 
 
-Faceting allows us to split data into subset and plot similar graphs for each subset. 
-In lecture we saw that facets are often very useful to avoid over-fitting. 
+Faceting allows us to split data into subsets and plot similar graphs for each subset. 
+In lecture we saw that facets are often very useful to avoid overplotting. 
 There are three types of facets in `ggplot2`: 
 
-* `facet_wrap`: Creates a one-dimensional set of plots, that are often shown in a 2d grid.
+* `facet_wrap`: Creates a one-dimensional set of plots, that are often shown in a 2D grid.
 * `facet_grid`: Creates a two-dimensional grid of panels, defined by two different columns. 
 * `facet_null`: This is the default facet, which is just a single plot
 
@@ -46,7 +46,7 @@ There are three types of facets in `ggplot2`:
 
 ## `facet_wrap` Example
 
-Lets use the `ToothGrowth` dataset:
+Let's use the `ToothGrowth` dataset:
 
 ```{r headTooth, exercise=TRUE}
 head(ToothGrowth)
@@ -56,7 +56,7 @@ head(ToothGrowth)
 unique(ToothGrowth$dose)
 ```
 
-A box-plot of all of the data: 
+A boxplot of all of the data: 
 
 ```{r}
 tooth_gg <- ggplot(ToothGrowth) + 
@@ -73,7 +73,7 @@ tooth_gg <- ggplot(ToothGrowth) +
   theme_bw()
 ```
 
-Now if we want to summarize at the distribution for tooth growth for each supplement, we can facet on supplement: 
+Now if we want to summarize the distribution for tooth growth for each supplement, we can facet on supplement: 
 
 ```{r wrappedBox, exercise=TRUE, exercise.setup="createBasicBox"}
 tooth_gg + 
@@ -121,7 +121,7 @@ tooth_gg +
 ## `facet_wrap` Exercise
 
 For this exercise, we are going to use the `barley` data from the `lattice` package. 
-This is famous statistical dataset that has been cited in many papers.
+This is a famous statistical dataset that has been cited in many papers.
 We will use it to create a *Cleveland dot plot*. 
 
 ```{r}
@@ -133,7 +133,7 @@ head(barley)
 barley <- lattice::barley
 ```
 
-**Exercise**: Add a facets and colors to the following code to reduce over-plotting. 
+**Exercise**: Add facets and colors to the following code to reduce over-plotting. 
 Do you notice anything strange about the data? 
 
 ```{r facetExercise, exercise=TRUE, exercise.setup="loadBarley"}
@@ -153,7 +153,7 @@ ggplot(barley) +
   theme_bw()
 ```
 
-In this plot, he points out that an oddity in Morris: it's the only site in which the 1932 crop yield was higher than that in 1931! 
+In this plot, he points out an oddity in Morris: it's the only site in which the 1932 crop yield was higher than that in 1931! 
 Using this plot, he claimed that the data must have been mislabeled (although there is [some recent argument](https://blog.revolutionanalytics.com/2014/07/theres-no-mistake-in-the-barley-data.html) that this is not the case). 
 
 ## Coordinate Systems
@@ -164,8 +164,8 @@ Coordinate systems allow us to easily change how the data are displayed, with li
 There are *linear* coordinate systems that don't change the shape of `geoms`: 
 
 > - `coord_cartesian()`: Default coordinate system
-> - `coord_flip()`: Default coordinate system, but flipping `x` and `y` axis. 
-> - `coord_fixed()`: Default coordinate system, but fixing the ratio between `x` and `y` axis. 
+> - `coord_flip()`: Default coordinate system, but flipping the `x` and `y` axes. 
+> - `coord_fixed()`: Default coordinate system, but fixing the ratio between the `x` and `y` axes. 
 
 There are also *non-linear* coordinate systems, that can change the shape of `geoms`: 
 
@@ -175,8 +175,8 @@ There are also *non-linear* coordinate systems, that can change the shape of `ge
 
 ## Polar Coordinate Example
 
-One of the most common coordinate transformations we see for data visualizations is **Polar-Coordinates**. 
-The idea for polar coordinate mapping is that sometimes displaying the information as an angle and radius is more informative than displaying the information in the `x, y` Cartesian plane,
+One of the most common coordinate transformations we see for data visualizations is **polar coordinates**. 
+The idea for polar coordinate mapping is that sometimes displaying information as an angle and radius is more informative than displaying it in the `x, y` Cartesian plane.
 for example polar coordinates often help us visualize seasonal effects. 
 
 ```{r mtcarsPolar, exercise=TRUE}
@@ -194,17 +194,17 @@ Let's take a look at a new coordinate system, using `coord_map()`.
 First, we will use the `maps` package to get information about some North American Countries. 
 
 ```{r NorthAmerica, echo=TRUE}
-world <- map_data("world") %>%
+world <- map_data("world") |>
   filter(region %in% c("USA", "Canada", "Mexico", "Jamaica",
                        "Cuba", "Panama", "Guatemala", "Puerto Rico", 
                        "Costa Rica", "Dominican Republic", "Haiti",
                        "El Salvador", "Belize", "Bahamas", "Nicaragua",
-                       "Honduras", "Trinidad")) %>%
+                       "Honduras", "Trinidad")) |>
   filter(long < 0)
 ```
 
 We can plot this data using `ggplot2` and `geom_polygon()`. 
-Lets save the map to use later:
+Let's save the map to use later:
 
 ```{r plotNorthAmerica, echo=TRUE}
 my_map <- ggplot(world) + 
@@ -218,12 +218,12 @@ print(my_map)
 ## `coord_map()` continued
 
 ```{r preLoadMap}
-world <- map_data("world") %>%
+world <- map_data("world") |>
   filter(region %in% c("USA", "Canada", "Mexico", "Jamaica",
                        "Cuba", "Panama", "Guatemala", "Puerto Rico", 
                        "Costa Rica", "Dominican Republic", "Haiti",
                        "El Salvador", "Belize", "Bahamas", "Nicaragua",
-                       "Honduras", "Trinidad")) %>%
+                       "Honduras", "Trinidad")) |>
   filter(long < 0)
 
 my_map <- ggplot(world) + 
@@ -232,7 +232,7 @@ my_map <- ggplot(world) +
   theme_bw()
 ```
 
-The problem with the previous slide is that the polygons are a bit distorted, so the polygons don't look exactly like we would expect.
+The problem with the previous slide is that the polygons are a bit distorted, so they don't look exactly as we would expect.
 `coord_map()` can help fix this issue.
 In particular, we will start with `coord_quickmap()`, which is the simplest implementation. 
 
@@ -254,10 +254,10 @@ my_map +
 
 ## Hurricane Map
 
-For this next plot, we will use the built in `storms` dataset, and we will look particularly at the storms in $2016$. 
+For this next plot, we will use the built in `storms` dataset, and we will look particularly at the storms in 2016. 
 
 ```{r HurricaneMap, exercise=TRUE, exercise.setup="preLoadMap"}
-my_storms <- storms %>%
+my_storms <- storms |>
   filter(year == 2016, name %in% c('Matthew', "Nicole", "Karl", "Otto"))
 
 my_map + 
