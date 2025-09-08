@@ -165,9 +165,8 @@ Why use a different coordinate system? One reason to provide a convenient or int
 
 Base plot:
 ```{r}
-overlap_boxplot <- ggplot(data = storms, aes(x = status, fill = status)) +
-  geom_bar() 
-print(overlap_boxplot)
+overlap_boxplot <- ggplot(data = storms, aes(x = status, fill = status)) + geom_bar() 
+overlap_boxplot
 ```
 
 Drawback with this - labels overlap 
@@ -195,12 +194,27 @@ hjust: This controls the horizontal justification of the text relative to the ti
 
 vjust: This controls the vertical justification of the text. A value of 1 aligns the top edge of the text with the tick mark, 0 aligns the bottom edge, and 0.5 centers it vertically.
 
+## Rearrange the bars
+
+We can arrange the bars based on their count
+```{r}
+ggplot(data = storms) + geom_bar(aes(y = fct_infreq(status), fill = status)) + labs(fill = 'Status', y = 'Storm Status')
+```
+
 ## Polar coordinates
 
 Polar coordinates: express location as **angle** and **magnitude** from the origin.
 
 ```{r}
 overlap_boxplot + coord_polar()
+```
+
+**`count` function**
+
+Let us verify the counts 
+
+```{r}
+storms |> count(status)
 ```
 
 ## Temperature data for Ann Arbor, MI
