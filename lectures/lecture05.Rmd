@@ -48,11 +48,26 @@ d3
 
 Note: Note how the lengths of the columns is made the same for data.frame by repeating the elements.
 
+## What We Know
+
+* Pulling out a single column: `d$col` 
+    alternatively you can use `pull(d, col)`
+* Creating a single column: `d$newcol <- EXPR`
+
+
+```{r}
+storms$status[1:5]
+
+pull(storms, status)[1:5]
+
+d <- tibble(x = 1:5)
+d$new_col = d$x * 2
+d
+
+```
 
 ## Common operations on tables (overview)
 
-* Pulling out a single column: `d$col`
-* Creating a single column: `d$newcol <- EXPR`
 * Selecting only required columns: `select(d, col1, col2)` (and several other forms)
 * Filter out rows: `filter(d, criterion1, criterion2)`
 * Creating new columns (in new table): `mutate(d, newcol = f(col1, col2), newcol2 = g(col3, newcol))`
@@ -65,39 +80,28 @@ Note: Note how the lengths of the columns is made the same for data.frame by rep
 
 <img src='images/pipe_operator.jpeg' width=500px />
 
-
 ## Getting several columns at once
 
 ```{r}
-select(d3, column_x) |> head(2)
+select(storms, name, status) |> head()
 ```
 
 ## Getting all but some columns
 
 ```{r}
-select(d3, !column_x) |> head(2)
+select(mpg, !drv) |> head(4)
 ```
 
 Alternatively
 ```{r}
-select(d3, -column_x) |> head(2)
+select(mpg, -drv) |> head(2)
 ```
 
 ## Selectively grabbing columns
 
-
-```{r letters, exercise = TRUE}
-
-```
-
-```{r}
-d3$letter <- letters[d3$column_x]
-d3$LETTER <- LETTERS[27 - d3$column_x]
-head(d3, 2)
-```
 Get only "character" type columns:
 ```{r}
-select(d3, where(is.character)) |> head(2)
+select(storms, where(is.character)) |> head()
 ```
 
 ## 'is' and 'as' functions for columns
@@ -123,6 +127,11 @@ When we start to write our own functions, we'll be able to create many more
 ## Grabbing rows by index
 
 Tables in R allow for **two-dimensional indexing**: `tbl[rows, cols]`.
+```{r}
+d3$letter <- letters[d3$column_x]
+d3$LETTER <- LETTERS[27 - d3$column_x]
+head(d3, 2)
+```
 
 ```{r}
 d3[1, ]
@@ -232,6 +241,9 @@ aatemp3 <- mutate(aatemp3,
                   z = (tdiff_abs - mean(tdiff_abs)) / sd(tdiff_abs))
 ggplot(aatemp3, aes(x = z)) + geom_histogram()
 ```
+
+We see a right-skewed (or positively skewed) distribution when we compute the `z` for temp difference
+
 
 ## Conditional evaluation with `if_else`
 
@@ -351,7 +363,7 @@ aatemp |> summarize(across(where(is.numeric), my_function))
 
 
 ```{r}
-aatemp %>%
+aatemp |>
   summarize(across(where(is.numeric), 
                    list(mean = ~mean(., na.rm = TRUE),
                         max = ~max(., na.rm = TRUE),
@@ -411,6 +423,47 @@ To get only distinct values, you could use the `distinct` function
 mpg |> distinct(manufacturer)
 ```
 
+## A Two-Step Approach to solutions
+
+Sometimes, a data analysis question is too complex to solve in a single step. A powerful strategy is to break the problem down into smaller, manageable pieces. Often, this involves a two-step process:
+
+1.  **Calculate an intermediate result:** Perform some calculations (e.g., group and summarize) to find a specific subset of your data you're interested in (like the "top 5" or "worst 3").
+
+2.  **Use the intermediate result to filter and visualize:** Use the result from the first step to filter your original dataset and then create a plot or perform further analysis on that subset.
+
+## Example: Top Manufacturers by Fuel Efficiency
+
+Let's find the 5 manufacturers with the highest average highway mileage (`hwy`) and then create a boxplot of their city mileage (`cty`).
+
+**Step 1: Find the top 5 manufacturers**
+
+First, we'll calculate the average `hwy` for each manufacturer and select the top 5. We'll store their names in a vector.
+
+```{r}
+top_5_manufacturers <- mpg |>
+  group_by(manufacturer) |>
+  summarize(avg_hwy = mean(hwy)) |>
+  slice_max(avg_hwy, n = 5) |>
+  pull(manufacturer)
+
+top_5_manufacturers
+```
+
+**Step 2: Filter the original data and plot**
+
+Now, we use the `top_5_manufacturers` vector to filter the original `mpg` dataset and create a boxplot of their city mileage.
+
+```{r}
+mpg |>
+  filter(manufacturer %in% top_5_manufacturers) |>
+  ggplot(aes(x = cty, y = manufacturer)) +
+  geom_boxplot() +
+  labs(title = "City Mileage for Top 5 Manufacturers by Highway Mileage",
+       x = "City Mileage (cty)",
+       y = "Manufacturer")
+```
+
+This two-step approach makes the code easier to read, write, and debug.
 
 ## Next class
 
