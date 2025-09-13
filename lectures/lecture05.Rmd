@@ -431,6 +431,14 @@ Sometimes, a data analysis question is too complex to solve in a single step. A 
 
 2.  **Use the intermediate result to filter and visualize:** Use the result from the first step to filter your original dataset and then create a plot or perform further analysis on that subset.
 
+## Group records using `group_by`
+
+* We often want to **partition** our data into smaller groups
+* Things like finding **conditional means** or **conditional medians**
+* `group_by` takes one or more grouping factors and creates a grouped table
+* `summarize` computes group level summaries
+* We'll see that `mutate` operates within groups, which can be quite helpful
+
 ## Example: Top Manufacturers by Fuel Efficiency
 
 Let's find the 5 manufacturers with the highest average highway mileage (`hwy`) and then create a boxplot of their city mileage (`cty`).
