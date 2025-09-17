@@ -22,6 +22,7 @@ aatemp <- read_csv("data/ann_arbor_weather.csv.gz")
 * `mutate`: Takes a table and returns a new table with columns added and/or subtracted
 * `mutate(d, new_col = f(x, y), new_col2 = new_col1 + 1, old_col = NULL)`
 * Can use functions that summarize, e.g., `mutate(d, x_centered = x - mean(x))`
+* `group_by` takes one or more grouping factors - useful for finding conditional summaries, transformations, or filters within subsets of data. `mpg |> group_by(manufacturer) |> summarize(hwy_mean = mean(hwy))`
 
 ## Today we will learn 
 

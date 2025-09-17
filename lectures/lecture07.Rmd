@@ -42,15 +42,14 @@ flights |>
     slice_max(mean_delay, n = 3)
 ```
 
-Another way of getting it
+But wait.. why not use the `mean` function?
 
 ```{r}
 flights |>
     filter(!is.na(dep_delay)) |>
     group_by(month) |>
-    summarize(mean_delay = sum(dep_delay)/n()) |>
-    arrange(desc(mean_delay)) |>
-    head(3)
+    summarize(mean_delay = mean(dep_delay)) |>
+    slice_max(mean_delay, n = 3)
 ```
 
 ## using `cut` function
@@ -59,7 +58,7 @@ When you want to convert a continuous variable to categorical;
 
 ```{r}
 
-x <- c(1, 2, 5, 10, 15, 20)
+x <- c(1, 2, 5, 6, 10, 14, 15, 20)
 cut(x, breaks = c(0, 5, 10, 15, 20))
 ```
 
@@ -75,7 +74,7 @@ cut(x,
 
 Mutate a new column called 'Grade' that marks as 'Pass' for students with a score above 70, 'Fail' otherwise
 
-```{r ex-1, exercise = TRUE}
+```{r ex-l6-01, exercise = TRUE}
 
 scores <- data.frame(
   student = c("Alice", "Bob", "Charlie", "David", "Emily", "Frank"),
@@ -85,7 +84,7 @@ scores <- data.frame(
 scores
 ```
 
-```{r ex-1-solution}
+```{r ex-l6-01-solution}
 scores <- data.frame(
   student = c("Alice", "Bob", "Charlie", "David", "Emily", "Frank"),
   score = c(75, 92, 68, 85, 50, 98)
@@ -170,19 +169,8 @@ Functions are miniature programs that take inputs and return a value.
 * Reuse the same set of steps in different contexts (variables, data sets)
 * Express key steps that should be done performed later (delayed computation)
 
-## Avoding repetition: groups
-
-If we want to repeat the same computation within groups we can avoid repetition (always our goal!) using `group_by`:
-
-```{r}
-aatemp |>
-  group_by(year(DATE)) |>
-  summarize(mean(TMAX - TMIN))
-```
 
 ## Correlation
-
-In the previous grouping example, we used the same variables in each group to make our computation. Sometimes we want to repeat the same computation on different variables.
 
 One way of defining the *correlation coefficient* for two variables is:
 
@@ -200,7 +188,7 @@ aatemp |>
 summarize(aatemp, cor(TMAX, TMIN))
 ```
 
-But lots of duplication!
+But we have duplicate code!
 
 ## Writing our own functions
 
@@ -249,15 +237,15 @@ aatemp |>
 
 ## Common use case: mutations and summaries
 
-Suppose we want to median center and scale in terms of the IQR. We are going to use this functionality on the original data, but also within years.
+Suppose we want to median center and scale in terms of the IQR. We are going to use this functionality on the original data, and also within years.
 
 ```{r}
-myscale <- function(x) {
+scale_IQR <- function(x) {
   (x - median(x)) / IQR(x)
 }
 ```
 ```{r}
-mutate(aatemp, TMAX_myscale = myscale(TMAX)) |>
+mutate(aatemp, TMAX_myscale = scale_IQR(TMAX)) |>
   ggplot(aes(x = factor(year(DATE)), y = TMAX_myscale)) +
     geom_violin()
 ```
@@ -265,41 +253,26 @@ mutate(aatemp, TMAX_myscale = myscale(TMAX)) |>
 
 ```{r}
 aatemp |> group_by(year(DATE)) |>
-  mutate(TMAX_scaled = myscale(TMAX)) |>
+  mutate(TMAX_scaled = scale_IQR(TMAX)) |>
   ggplot(aes(x = factor(year(DATE)), y = TMAX_scaled))+
     geom_violin()
 ```
 
 
-
-
-
-## From duplicated code to clean code
+## Writing our own functions: capturing common behavior
 
 How many interquartile ranges above or below the median? (Similar to a Z-score)
-
-```{r}
-mutate(aatemp, TMAX_scale_IQR = (TMAX - median(TMAX)) / IQR(TMAX),
-               TMIN_scale_IQR = (TMIN - median(TMIN)) / IQR(TMIN)) |>
-  group_by(abs(TMAX_scale_IQR) > 1.5, abs(TMIN_scale_IQR) > 1.5) |>
-  summarize(n())
-```
-
-## Writing our own functions: capturing common behavior
 
 ```{r}
 scale_IQR <- function(x) {
   (x - median(x)) / IQR(x)
 }
 
-temp_summary <- function(tbl) {
-  group_by(tbl, abs(TMAX_scale_IQR) > 1.5, abs(TMIN_scale_IQR) > 1.5) |>
-  summarize(n())
-}
 
 mutate(aatemp, TMAX_scale_IQR = scale_IQR(TMAX), 
                TMIN_scale_IQR = scale_IQR(TMIN)) |>
-  temp_summary()
+  group_by(abs(TMAX_scale_IQR) > 1.5, abs(TMIN_scale_IQR) > 1.5) |>
+  summarize(n())
 ```
 
 ## Even better: `across`
