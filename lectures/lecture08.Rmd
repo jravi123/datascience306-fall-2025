@@ -63,7 +63,7 @@ print(table4a) # cases in one tibble
 print(table4b) # population in another one
 ```
 
-The above is a messy data, since the values in the variable year are now column names
+The above is a messy data, since the values in the variable year are now column names. But sometimes we do want to see it in this format as it is visually easy to understand.
 
 ## Recap
 
@@ -80,7 +80,7 @@ The tools we have learned so far all live in the tidyverse.
 
 This means that each tool expects to receive tidy data as input, and, where necessary, returns tidy data as output. 
 
-You can think of tidy data as a sort of contract that everything in tidyverse respects. This makes it possible to string many tidyverse commands together using |> without having to worry about whether they all work together.
+You can think of tidy data as a sort of contract that everything in `tidyverse` respects. This makes it possible to string many tidyverse commands together using `|>` without having to worry about whether they all work together.
 
 For instance, let us calculate rate of cases per 10000 people for the data in table1.
 
@@ -104,7 +104,7 @@ table1 |> ggplot(aes(
 ```
 
 ## Messy disadvantages
-How would we calculate the rate variable using table2?
+How would we calculate the `rate` variable using table2?
 
 ```{r}
 table2
@@ -127,7 +127,7 @@ count(table1, year, wt = cases) # compute no. of cases for each year
 
 ## Creating tidy data
 
-If the data is not already tidy, then we might need to do some work before we can use the tools in dplyr. The package `tidyr` inside tidyverse allows one to convert data into the tidy data
+If the data is not already tidy, then we might need to do some work before we can use the tools in `dplyr`. The package `tidyr` inside tidyverse allows one to convert data into the tidy data
 
 ## Making data longer
 One common problem is when a variable is spread across multiple columns and we need to gather those columns to create a new pair of variables. For example, consider table4a from above:
@@ -143,23 +143,28 @@ Here there is a year variable which is spread across two columns. To become tidy
 The command to do this is called pivot_longer(). To use it, we specify three things:
 
 * which existing columns (the `cols`) should have been the values of a variable? - this is mandatory
-* what is the name of the new variable (the `names`) whose values currently appear as column names? - this is optional
-* what is the name of the new variable (the `values`) whose values are currently spread over the many columns (shown in point 1 above) cell? - this is optional
+* what is the name of the new variable (the `name`) whose values currently appear as column names? - this is optional
+* what is the name of the new variable (the `value`) whose values are currently spread over the many columns (shown in point 1 above) cell? - this is optional
 
-(When using pivot_longer(), neither the names nor values column names currently exist in your data. They are "destination" columns in the new table.)
+(When using pivot_longer(), neither the `name` nor `value` column names currently exist in your data. They are the "destination" columns in the new table.)
 
 ```{r}
 # pivot table4a with default arguments
-pivot_longer(table4a, cols= c('1999', '2000'))
+pivot_longer(table4a, cols = c('1999', '2000'))
+```
+
+You can also use the column index values
+```{r}
+table4a |> pivot_longer(cols = c(2, 3))
 ```
 
 Notice how R chose default names "name" and "value" for the new columns it created. We can change those to be more informative using the options `names_to =` and `values_to =`:
 
 ```{r pivot-longer, exercise = TRUE}
-
+table4a
 ```
 
-## setting optional paramters
+## setting optional parameters
 
 We can provide the column names that we want instead of going with defaults
 
@@ -288,46 +293,26 @@ grades %>%
     
 ```
 
-## Exploring climate data
-The [Global Historical Climate Network](https://www.drought.gov/data-maps-tools/global-historical-climatology-network-ghcn) is amazing database of daily weather data going back, in some cases, >100 years. Here is the downloaded daily observation data for Ann Arbor from 1991 to present:
+## Exercise
+I want to see storms count for all the years greater than 2010 in this format where each column represents the month. NA values should be represented with '0'
+<pre>
+# A tibble: 12 × 10
+    year   `6`   `7`   `8`   `9`  `10`  `11`
+   <dbl> <int> <int> <int> <int> <int> <int>
+ 1  2011    12    57   158   222    80    28
+ 2  2012    54     0   212   181   159     0
+ 3  2013    37    50    41   120    56    26
+ 4  2014     9    66    69    66    90     0
+ 5  2015    22    15    55   140    59    20
+ 6  2016    63     0   126   194   103    38
+ 7  2017    29    22   126   292    93    21
+ 8  2018     0   102    57   278   130    15
+ 9  2019     0    30    73   227    99    34
+10  2020    57   115   124   307   119   116
+11  2021    41    42   181   217    65    29
+12  2022    30    48     2   269    61    61
+</pre>
 
-```{r}
-load(url("https://datasets.stats306.org/a2weather.RData"))
-print(a2weather)
+```{r ex-l08-1, exercise = TRUE}
+
 ```
-
-Questions about these data:
-
-* What do the columns mean? What are the units? How can we find this information out?
-* Are the data in an appropriate format to answer these questions?
-If not, how can we get them there?
-
-```{r a2weather, exercise = TRUE}
-load(url("https://datasets.stats306.org/a2weather.RData"))
-a2weather
-```
-
-## Let us analyze the TMAX values for 2022
-
-```{r}
-a2weather |>
-  filter(element == 'TMAX', year == '2022') |>
-  select(month, starts_with('VALUE')) |>
-    pivot_longer(
-                cols = starts_with('VALUE'),
-                names_prefix = 'VALUE',
-                names_to = 'day'
-    ) -> a2weather2
-
-a2weather2
-```
-
-```{r}
-a2weather2 |>
-      group_by(month) |>
-      summarize(avg_temp = mean(value, na.rm = T)) |>
-        ggplot(aes(x = month, y = avg_temp)) +
-        geom_line()
-```
-
-why are the temperature values so high? what is the unit of measurement?
