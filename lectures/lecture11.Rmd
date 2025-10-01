@@ -108,11 +108,11 @@ titanic |> head()
 ## Exercise
 What is the average age of the passengers (ignoring the decimal part)?
 
-```{r eg-1, exercise = TRUE}
-
+```{r eg-lec11-1, exercise = TRUE}
+titanic = read.csv('https://storage.googleapis.com/mbcc/titanic.csv')
 ```
 
-```{r eg-1-solution}
+```{r eg-lec11-1-solution}
 titanic |>
   filter(!is.na(age)) |>
   summarize(mean_age = mean(age))
@@ -126,10 +126,10 @@ titanic$age %>% mean(na.rm = T)
 ## Exercise
 Find the number of NA values in the age column
 
-```{r eg-2, exercise = TRUE}
+```{r eg-lec11-2, exercise = TRUE}
 ```
 
-```{r eg-2-solution}
+```{r eg-lec11-2-solution}
 # many ways
 
 sum(is.na(titanic$age))
@@ -140,11 +140,11 @@ titanic %>% filter(is.na(age)) %>% nrow
 ## Exercise
 Replace the NA values in the age column with average age
 
-```{r eg-3, exercise = TRUE}
+```{r eg-lec11-3, exercise = TRUE}
 
 ```
 
-```{r eg-3-solution}
+```{r eg-lec11-3-solution}
 titanic |>
   mutate(age = coalesce(age, mean(age, na.rm = T))) |>
   count(is.na(age))
