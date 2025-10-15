@@ -1,0 +1,464 @@
+---
+title: "DATASCI 306: Lecture 12"
+subtitle: "SQL"
+output:
+  learnr::tutorial:
+    progressive: true
+    css: css/lecture.css
+runtime: shiny_prerendered
+---
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(DBI)
+library(dbplyr)
+library(tidyverse)
+library(nycflights13)
+library(lubridate) # install.packages("lubridate") if you don't have this
+```
+
+## Today's Topics
+
+* Statistical Tests
+* SQL - Structured Query Language
+
+
+## Statistical Tests
+
+Statistical tests are used to determine whether a hypothesis about data is true. They are a formal way to make conclusions about a population based on sample data.
+
+- **Null Hypothesis (H0):** A statement that there is no effect or no difference.
+- **Alternative Hypothesis (H1):** A statement that there is an effect or a difference.
+
+We use statistical tests to calculate a `p-value`, which is the probability of observing the data (or something more extreme) if the null hypothesis is true. 
+
+**A small p-value (typically < 0.05) provides evidence against the null hypothesis.**
+
+## T-test
+
+A t-test is used to compare the means of two groups. For example, we can use a t-test to determine if there is a significant difference in the price of diamonds based on their cut.
+
+Let's perform a t-test on the `diamonds` dataset to see if there is a significant difference in price between 'Ideal' and 'Premium' cut diamonds.
+
+```{r}
+# Load the diamonds dataset
+data(diamonds)
+
+# Filter for Ideal and Premium cut diamonds
+ideal_diamonds <- diamonds |> filter(cut == "Ideal")
+premium_diamonds <- diamonds |> filter(cut == "Premium")
+
+# Perform a two-sample t-test
+t_test_result <- t.test(ideal_diamonds$price, premium_diamonds$price)
+
+# Print the result
+print(t_test_result)
+```
+
+The p-value is very small, which suggests that there is a significant difference in the mean price between 'Ideal' and 'Premium' cut diamonds.
+
+
+
+## Chi-squared Test
+
+The Chi-squared test is a statistical tool used to determine if there is a significant association between two categorical variables. The core idea is to compare the frequencies you **observe** in your data with the frequencies you would **expect** to see if the variables were independent (i.e., not associated).
+
+### Example: Movie Genre vs. Ice Cream Flavor
+
+Let's say we survey 200 people about their favorite movie genre (Comedy or Sci-Fi) and their preferred ice cream flavor (Chocolate or Vanilla).
+
+Is a statistically significant association between a person's choice in movie genre and their choice in ice cream flavor?
+
+#### 1. Observed Frequencies
+
+Our survey results are the **observed frequencies**. This is the actual data we collected:
+
+| | Prefers Chocolate | Prefers Vanilla | **Row Total** |
+| :--- | :---: | :---: | :---: |
+| **Likes Comedy** | 70 | 30 | **100** |
+| **Likes Sci-Fi** | 20 | 80 | **100** |
+| **Column Total**| **90** | **110** | **200** |
+
+Each data intersection is a **"cell"**. For example, the cell for people who like Comedy and prefer Chocolate has an observed count of 70.
+
+#### 2. Expected Frequencies
+
+Next, we calculate the **expected frequencies**. These are the counts we would expect in each cell *if there were no association* between movie and ice cream preferences.
+
+If two events are independent, the probability of both happening is the product of their individual probabilities:
+  
+  `P(A and B) = P(A) * P(B)`
+
+So the expected count is:
+
+| | Prefers Chocolate | Prefers Vanilla |
+| :--- | :---: | :---: |
+| **Likes Comedy** | 45 | 55 |
+| **Likes Sci-Fi** | 45 | 55 |
+
+#### 3. The Comparison
+
+The Chi-squared test works by comparing the two tables above. It calculates a statistic that summarizes the total difference between the observed counts (70, 30, 20, 80) and their corresponding expected counts (45, 55, 45, 55).
+
+If the total difference is large, it suggests that our initial assumption (that there's no association) is wrong. In other words, a large deviation between observed and expected counts points to a significant association between the variables.
+
+## When to use which?
+
+- **T-test vs. Chi-squared Test:**
+  - A **t-test** is used when you are comparing the means of a continuous variable between two groups (e.g., the price of diamonds between two types of cuts).
+  - A **Chi-squared test** is used when you are looking at the relationship between two categorical variables (e.g., is there an association between diamond cut and color?).
+  
+**ANOVA (Analysis of Variance)**
+
+ANOVA is used to compare the means of three or more groups. It is an extension of the t-test. For example, you could use ANOVA to see if there is a significant difference in the price of diamonds across all the different types of cuts (Fair, Good, Very Good, Premium, Ideal).
+
+**Correlation Test**
+
+A correlation test (we already used this) is used to determine if there is a linear relationship between two continuous variables. For example, you could use a correlation test to see if there is a relationship between the carat of a diamond and its price.
+
+## SQL - Structured Query Language
+
+A huge amount of data resides in relational databases, so it's important to understand how to connect to and work with them.
+
+This part of the lecture corresponds to Chapter 21 of the textbook.
+
+## Database Connection
+
+To connect to a database from R, you’ll use a pair of packages:
+
+* **DBI (database interface):** This provides a set of generic functions to connect to the database, upload data, run SQL queries, etc.
+* **A DBMS-specific package:** You’ll also use a package tailored to the specific DBMS you’re connecting to. This package translates the generic DBI commands into the specifics needed for a given DBMS. There’s usually one package for each DBMS, e.g., `RPostgres` for Postgres and `RMariaDB` for MySQL. In this lecture, we use SQLite and the `RSQLite` package.
+
+## Let's create a database
+
+```{r}
+
+# Create an ephemeral in-memory RSQLite database
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+
+dbListTables(con)
+```
+
+Initially, you'll see that there are no tables when you run the command.
+
+## dbplyr
+
+`dbplyr` is a `dplyr` backend that allows you to continue writing `dplyr` code, which it then translates into SQL. We will now create a table named 'mpg' in our SQLite database from the `mpg` tibble. `dbplyr` generates the necessary SQL queries behind the scenes.
+
+```{r}
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+dbListTables(con)
+```
+
+To remove the table:
+
+```{r}
+# dbRemoveTable(con, 'mpg') # this will delete the table
+```
+
+Now let us look into the column names of this table:
+
+```{r}
+dbListFields(con, "mpg")
+```
+
+Time to read the entire table!
+
+```{r}
+dbReadTable(con, "mpg")
+```
+
+## Selecting Data from a Table
+
+The SQL syntax for selecting columns from a table is:
+
+
+    sql
+    SELECT <col1>, <col2>, ..., <coln> FROM <table>
+
+
+Note the similarity to the corresponding tidyverse command:
+
+    r
+    select(<table>, <col1>, <col2>, ..., <coln>)
+
+
+Let's select some records:
+
+```{r}
+res <- dbSendQuery(con, "SELECT * FROM mpg")
+res
+```
+
+```{r}
+dbFetch(res) |> head()
+dbClearResult(res)
+```
+
+The asterisk (`*`) is a special keyword that means "select everything," equivalent to dplyr's `everything()`:
+
+For very large tables, SQL allows you to limit the number of returned rows using the `LIMIT` clause.
+
+```{r}
+# using limit
+res <- dbSendQuery(con, "SELECT * FROM mpg LIMIT 2")
+dbFetch(res)
+```
+
+```r
+# run this to reset the resultset
+dbClearResult(res)
+```
+
+## Filtering
+
+The SQL syntax for filtering rows uses the `WHERE` clause:
+
+
+    sql
+    SELECT * FROM <table> WHERE dest = "IAH"
+
+
+This is the same as:
+
+
+    r
+    filter(<table>, dest == "IAH")
+
+
+Note that SQL uses a single equals sign (`=`) for equality checks, unlike R's `==`.
+
+```{r}
+res <- dbSendQuery(con, "SELECT * FROM mpg WHERE cyl = 4")
+dbFetch(res)
+```
+
+## More Tables
+
+Now, let's create more tables using other datasets from Tidyverse.
+
+```{r}
+dbWriteTable(con, "flights", flights, overwrite = T)
+dbWriteTable(con, "airports", airports, overwrite = T)
+dbWriteTable(con, "airlines", airlines, overwrite=T)
+dbWriteTable(con, "planes", planes, overwrite = T)
+dbWriteTable(con, "weather", weather, overwrite = T)
+```
+
+We will define a convenience function to simplify our queries.
+
+```{r}
+q <- function(...) dbGetQuery(con, ...)
+print(q)
+```
+
+* The first ... in function(...) means that this new function can accept any number of additional arguments.
+
+* The second ... in dbGetQuery(con, ...) passes all of those received arguments directly to the dbGetQuery() function. 
+
+## Missing Data
+In SQL, missing data is represented by `NULL`, which is analogous to `NA` in R.
+
+```{r}
+# select non-null dep time
+
+q('SELECT * FROM flights WHERE dep_delay IS NOT NULL') |> as_tibble() |> print()
+
+# filter(flights, !is.na(dep_delay))
+```
+
+## Summarizing
+
+The SQL syntax for summarizing uses the `GROUP BY` clause:
+
+    {sql}
+    SELECT AVG(<col>) AS avg_col FROM <table> GROUP BY(<group cols>)
+    
+This is the same as:
+
+    {r}
+    <table> |> group_by(<group cols>) |> summarize(avg_col = mean(<col>))
+    
+```{r}
+# select the average distance and count for each day
+
+q("SELECT year, month, day, AVG(distance) AS avg_dist,
+    COUNT(*) AS n FROM flights GROUP BY year, month, day")
+
+# equivalent to
+# flights |> group_by(year, month, day) |> summarize(avg_dist = mean(distance), n = n())
+```
+
+## Joins
+
+The SQL syntax for joins is as follows:
+
+    {sql}
+    SELECT * FROM <table> LEFT JOIN <other_table> ON <left_key_col> = <right_key_col>
+
+This is the same as:
+
+    {r}
+    left_join(<table>, <other_table>, by = c("<left_key_col>" = "<right_key_col>"))
+
+
+```{r}
+q("SELECT flights.year AS flight_yr, planes.tailnum, * FROM flights
+    LEFT JOIN planes ON flights.tailnum = planes.tailnum")
+```
+
+
+## Ranking
+
+Ranking operates slightly differently in SQL than in dplyr. The overall syntax is:
+
+    SELECT RANK() OVER (
+        PARTITION BY <columns>
+        ORDER BY <expression1> [ASC|DESC], ...
+    ) RankedCol FROM <table>
+    
+```{r}
+# rank departure delay by month, day
+
+q('SELECT year, month, day, dep_delay, RANK() OVER (
+    PARTITION BY month, day
+    ORDER BY dep_delay DESC
+    ) r FROM flights')
+```
+
+The above query is equivalent to:
+
+```{r}
+flights |> group_by(month, day) |> mutate(r = min_rank(-dep_delay)) |>
+    select(month, day, dep_delay, r) |> arrange(month, day, r)
+```
+
+## Subqueries
+A potentially confusing aspect of SQL is that you cannot filter (using `WHERE`) based on a ranking condition directly:
+
+```{r lec12-01, exercise = TRUE}
+q('SELECT year, month, day, dep_delay, RANK() OVER (
+    PARTITION BY month, day
+    ORDER BY dep_delay DESC
+    ) r FROM flights WHERE r  = 1')
+```
+
+You need to use a subquery to achieve this, as shown below.
+
+```{r}
+
+q('SELECT year, month, day, dep_delay, r FROM
+    (
+        SELECT year, month, day, dep_delay, RANK() OVER (
+        PARTITION BY month, day
+        ORDER BY dep_delay DESC
+    ) r FROM flights)
+    WHERE r = 1
+')
+```
+
+## Exercise
+
+Find the max highway miles for each manufacturer.
+
+
+```{r lec12-02, exercise = TRUE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+# replace ... with your query
+res <- dbSendQuery(con, "....")
+dbFetch(res)
+dbClearResult(res)
+```
+
+```{r lec12-02-solution}
+"SELECT manufacturer, MAX(hwy) FROM mpg GROUP BY manufacturer"
+```
+
+## Exercise
+How many 4-cylinder models are present in this database?
+
+```{r lec12-03, exercise = TRUE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+# replace ... with your query
+res <- dbSendQuery(con, "....")
+dbFetch(res)
+dbClearResult(res)
+```
+
+
+```{r lec12-03-solution}
+"SELECT COUNT(*) FROM mpg WHERE cyl = 4"
+```
+
+## Exercise
+
+Extend the previous query to retrieve the minimum `hwy` value grouped by manufacturer and model.
+
+```{r ex-5, exercise = TRUE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+# replace ... with your query
+res <- dbSendQuery(con, "....")
+dbFetch(res)
+dbClearResult(res)
+```
+
+```{r ex-5-solution}
+"SELECT manufacturer, model, MIN(hwy) FROM mpg GROUP BY manufacturer, model"
+```
+
+## Using the `HAVING` Clause
+
+The `WHERE` clause filters rows before aggregation. If you need to filter based on the results of an aggregate function (like `COUNT(*)`), you must use the `HAVING` clause instead.
+
+For example, to get all destinations with more than 10,000 total flights:
+
+```{r}
+
+q('SELECT dest, COUNT(*) AS total FROM flights GROUP BY dest HAVING total > 10000' )
+```
+
+## Exercise
+Get all the manufacturers that have a total of 4 or more 'compact' cars.
+
+```{r ex-6, exercise = TRUE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+# replace ... with your query
+res <- dbSendQuery(con, "....")
+dbFetch(res)
+dbClearResult(res)
+```
+
+```{r ex-6-solution}
+"SELECT manufacturer, class, COUNT(*) FROM mpg WHERE class = 'compact' GROUP BY manufacturer HAVING COUNT(*) >= 4"
+```
+
+## Exercise
+Get the distinct car manufacturers in this dataset.
+
+```{r ex-7, exercise = TRUE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = T)
+# replace ... with your query
+res <- dbSendQuery(con, "....")
+dbFetch(res)
+dbClearResult(res)
+```
+
+```{r ex-7-solution}
+"SELECT DISTINCT manufacturer FROM mpg"
+```
+
+When you are finished, it is good practice to disconnect from the database.
+
+```{r}
+dbClearResult(res)
+dbDisconnect(con)
+```
+## Other Resources
+* [W3Schools SQL Tutorial](https://www.w3schools.com/sql/default.asp)
+* [SQL Murder Mystery](https://mystery.knightlab.com/)
