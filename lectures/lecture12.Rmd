@@ -18,6 +18,17 @@ library(nycflights13)
 library(lubridate) # install.packages("lubridate") if you don't have this
 ```
 
+```{r lecture12-setup, include=FALSE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = TRUE)
+dbWriteTable(con, "flights", flights, overwrite = TRUE)
+dbWriteTable(con, "airports", airports, overwrite = TRUE)
+dbWriteTable(con, "airlines", airlines, overwrite=TRUE)
+dbWriteTable(con, "planes", planes, overwrite = TRUE)
+dbWriteTable(con, "weather", weather, overwrite = TRUE)
+q <- function(...) dbGetQuery(con, ...)
+```
+
 ## Today's Topics
 
 * Statistical Tests
@@ -86,11 +97,37 @@ Each data intersection is a **"cell"**. For example, the cell for people who lik
 
 Next, we calculate the **expected frequencies**. These are the counts we would expect in each cell *if there were no association* between movie and ice cream preferences.
 
-If two events are independent, the probability of both happening is the product of their individual probabilities:
-  
-  `P(A and B) = P(A) * P(B)`
+#### Deriving the Formula
 
-So the expected count is:
+The formula for the expected count comes from the definition of statistical independence. If two events (like liking a movie genre and preferring an ice cream flavor) are independent, the probability of both happening is the product of their individual probabilities:
+
+`P(A and B) = P(A) * P(B)`
+
+Let's apply this to the "Likes Comedy" and "Prefers Chocolate" cell:
+
+1.  **Calculate Individual Probabilities:**
+    *   The probability of a randomly chosen person liking comedy is:
+        `P(Likes Comedy) = (Total who like Comedy) / (Grand Total) = 100 / 200 = 0.5`
+    *   The probability of a randomly chosen person preferring chocolate is:
+        `P(Prefers Chocolate) = (Total who prefer Chocolate) / (Grand Total) = 90 / 200 = 0.45`
+
+2.  **Calculate Combined Probability:**
+    Assuming independence, the probability of someone liking comedy AND preferring chocolate is:
+    `P(Likes Comedy and Prefers Chocolate) = 0.5 * 0.45 = 0.225`
+
+3.  **Calculate Expected Count:**
+    To find the expected *number* of people in our survey of 200, we multiply this probability by the grand total:
+    `Expected Count = 0.225 * 200 = 45`
+
+The formula `Expected Count = (Row Total * Column Total) / Grand Total` is a direct simplification of this logic: `(100 * 90) / 200 = 45`.
+
+Using this formula, we can calculate the expected counts for all cells:
+
+*   **Expected (Likes Comedy, Prefers Vanilla):** `(100 * 110) / 200 = 55`
+*   **Expected (Likes Sci-Fi, Prefers Chocolate):** `(100 * 90) / 200 = 45`
+*   **Expected (Likes Sci-Fi, Prefers Vanilla):** `(100 * 110) / 200 = 55`
+
+This gives us the final table of expected counts:
 
 | | Prefers Chocolate | Prefers Vanilla |
 | :--- | :---: | :---: |
@@ -337,7 +374,7 @@ flights |> group_by(month, day) |> mutate(r = min_rank(-dep_delay)) |>
 ## Subqueries
 A potentially confusing aspect of SQL is that you cannot filter (using `WHERE`) based on a ranking condition directly:
 
-```{r lec12-01, exercise = TRUE}
+```{r lec12-01, exercise = TRUE, exercise.setup="lecture12-setup"}
 q('SELECT year, month, day, dep_delay, RANK() OVER (
     PARTITION BY month, day
     ORDER BY dep_delay DESC
@@ -363,51 +400,39 @@ q('SELECT year, month, day, dep_delay, r FROM
 Find the max highway miles for each manufacturer.
 
 
-```{r lec12-02, exercise = TRUE}
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-dbWriteTable(con, "mpg", mpg, overwrite = T)
+```{r lec12-02, exercise = TRUE, exercise.setup="lecture12-setup"}
 # replace ... with your query
-res <- dbSendQuery(con, "....")
-dbFetch(res)
-dbClearResult(res)
+q("....")
 ```
 
 ```{r lec12-02-solution}
-"SELECT manufacturer, MAX(hwy) FROM mpg GROUP BY manufacturer"
+q("SELECT manufacturer, MAX(hwy) FROM mpg GROUP BY manufacturer")
 ```
 
 ## Exercise
 How many 4-cylinder models are present in this database?
 
-```{r lec12-03, exercise = TRUE}
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-dbWriteTable(con, "mpg", mpg, overwrite = T)
+```{r lec12-03, exercise = TRUE, exercise.setup="lecture12-setup"}
 # replace ... with your query
-res <- dbSendQuery(con, "....")
-dbFetch(res)
-dbClearResult(res)
+q("....")
 ```
 
 
 ```{r lec12-03-solution}
-"SELECT COUNT(*) FROM mpg WHERE cyl = 4"
+q("SELECT COUNT(*) FROM mpg WHERE cyl = 4")
 ```
 
 ## Exercise
 
 Extend the previous query to retrieve the minimum `hwy` value grouped by manufacturer and model.
 
-```{r ex-5, exercise = TRUE}
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-dbWriteTable(con, "mpg", mpg, overwrite = T)
+```{r ex-5, exercise = TRUE, exercise.setup="lecture12-setup"}
 # replace ... with your query
-res <- dbSendQuery(con, "....")
-dbFetch(res)
-dbClearResult(res)
+q("....")
 ```
 
 ```{r ex-5-solution}
-"SELECT manufacturer, model, MIN(hwy) FROM mpg GROUP BY manufacturer, model"
+q("SELECT manufacturer, model, MIN(hwy) FROM mpg GROUP BY manufacturer, model")
 ```
 
 ## Using the `HAVING` Clause
@@ -424,39 +449,30 @@ q('SELECT dest, COUNT(*) AS total FROM flights GROUP BY dest HAVING total > 1000
 ## Exercise
 Get all the manufacturers that have a total of 4 or more 'compact' cars.
 
-```{r ex-6, exercise = TRUE}
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-dbWriteTable(con, "mpg", mpg, overwrite = T)
+```{r ex-6, exercise = TRUE, exercise.setup="lecture12-setup"}
 # replace ... with your query
-res <- dbSendQuery(con, "....")
-dbFetch(res)
-dbClearResult(res)
+q("....")
 ```
 
 ```{r ex-6-solution}
-"SELECT manufacturer, class, COUNT(*) FROM mpg WHERE class = 'compact' GROUP BY manufacturer HAVING COUNT(*) >= 4"
+q("SELECT manufacturer, class, COUNT(*) FROM mpg WHERE class = 'compact' GROUP BY manufacturer HAVING COUNT(*) >= 4")
 ```
 
 ## Exercise
 Get the distinct car manufacturers in this dataset.
 
-```{r ex-7, exercise = TRUE}
-con <- dbConnect(RSQLite::SQLite(), ":memory:")
-dbWriteTable(con, "mpg", mpg, overwrite = T)
+```{r ex-7, exercise = TRUE, exercise.setup="lecture12-setup"}
 # replace ... with your query
-res <- dbSendQuery(con, "....")
-dbFetch(res)
-dbClearResult(res)
+q("....")
 ```
 
 ```{r ex-7-solution}
-"SELECT DISTINCT manufacturer FROM mpg"
+q("SELECT DISTINCT manufacturer FROM mpg")
 ```
 
 When you are finished, it is good practice to disconnect from the database.
 
 ```{r}
-dbClearResult(res)
 dbDisconnect(con)
 ```
 ## Other Resources

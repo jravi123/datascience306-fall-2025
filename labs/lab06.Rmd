@@ -1,0 +1,323 @@
+---
+title: "DATASCI 306 Lab 06"
+subtitle: "SQL"
+output: 
+  learnr::tutorial:
+    progressive: false
+runtime: shiny_prerendered
+---
+
+<style type="text/css">
+  body{
+  font-size: 14pt;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(learnr)
+library(tidyverse)
+library(DBI)
+library(dbplyr)
+library(RSQLite)
+library(nycflights13)
+```
+
+```{r lab06-setup, include=FALSE}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+dbWriteTable(con, "mpg", mpg, overwrite = TRUE)
+dbWriteTable(con, "flights", flights, overwrite = TRUE)
+dbWriteTable(con, "planes", planes, overwrite = TRUE)
+dbWriteTable(con, "airports", airports, overwrite = TRUE)
+dbWriteTable(con, "airlines", airlines, overwrite = TRUE)
+q <- function(...) dbGetQuery(con, ...)
+```
+
+## Introduction to SQL
+
+SQL (Structured Query Language) is a standard language for accessing and manipulating databases. A huge amount of data resides in relational databases, so it's important to understand how to connect to and work with them. In this lab, we will learn how to use SQL within R.
+
+## Database Connection
+
+To connect to a database from R, you'll use a pair of packages:
+
+*   **DBI (database interface):** This provides a set of generic functions to connect to the database, upload data, run SQL queries, etc.
+*   **A DBMS-specific package:** You'll also use a package tailored to the specific DBMS you're connecting to. We will use SQLite and the `RSQLite` package.
+
+First, let's create an in-memory SQLite database.
+
+```{r db_connect}
+# Create an ephemeral in-memory RSQLite database
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+q <- function(...) dbGetQuery(con, ...)
+
+dbListTables(con)
+```
+
+## Creating and Writing to Tables
+
+We can write R data frames into our database. We will now create a table named 'mpg' in our SQLite database from the `mpg` tibble.
+
+```{r db_write}
+dbWriteTable(con, "mpg", mpg, overwrite = TRUE)
+dbListTables(con)
+```
+
+We can also see the columns of the table.
+
+```{r db_fields}
+dbListFields(con, "mpg")
+```
+
+Let's add the `flights`, `planes`, `airports`, and `airlines` data from `nycflights13` as well.
+
+```{r db_write_flights}
+dbWriteTable(con, "flights", flights, overwrite = TRUE)
+dbWriteTable(con, "planes", planes, overwrite = TRUE)
+dbWriteTable(con, "airports", airports, overwrite = TRUE)
+dbWriteTable(con, "airlines", airlines, overwrite = TRUE)
+dbListTables(con)
+```
+
+## Basic SQL Queries
+
+We will use our `q()` function to send a query and get the result back as a data frame.
+
+### SELECT
+
+The `SELECT` statement is used to select data from a database.
+
+```{r select_cols}
+q("SELECT origin, dest, distance FROM flights LIMIT 5")
+```
+
+### Exercise 1
+
+Select the `model`, `displ`, and `hwy` columns from the `mpg` table for all cars made by 'audi'.
+
+```{r ex1, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex1-solution}
+q("SELECT model, displ, hwy FROM mpg WHERE manufacturer = 'audi'")
+```
+
+### WHERE
+
+The `WHERE` clause is used to filter records based on a condition.
+
+This query selects all flights for the carrier "UA" (United Airlines).
+
+```{r where_clause}
+q("SELECT * FROM flights WHERE carrier = 'UA' LIMIT 5")
+```
+
+### Exercise 2
+
+Select flights that had an arrival delay (`arr_delay`) of more than 120 minutes. Show the carrier and the delay.
+
+```{r ex2, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex2-solution}
+q("SELECT carrier, arr_delay FROM flights WHERE arr_delay > 120 LIMIT 10")
+```
+
+### Exercise 3: More Complex Filtering
+
+Select all flights that departed during summer (June, July, August) and were headed to either 'LAX' or 'SFO'.
+
+```{r ex3, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex3-solution}
+q("SELECT * FROM flights WHERE month IN (6, 7, 8) AND dest IN ('LAX', 'SFO') LIMIT 10")
+```
+
+## Aggregation and Grouping
+
+### GROUP BY and Aggregate Functions
+
+The `GROUP BY` statement groups rows that have the same values into summary rows. It is often used with aggregate functions (`COUNT()`, `MAX()`, `MIN()`, `SUM()`, `AVG()`).
+
+This query finds the average departure delay for each origin airport.
+
+```{r group_by}
+q("SELECT origin, AVG(dep_delay) AS avg_dep_delay FROM flights GROUP BY origin")
+```
+
+### Exercise 4
+
+Find the number of different models for each manufacturer in the `mpg` dataset.
+
+```{r ex4, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex4-solution}
+q("SELECT manufacturer, COUNT(DISTINCT model) AS num_models FROM mpg GROUP BY manufacturer")
+```
+
+### HAVING
+
+The `HAVING` clause is used to filter groups based on the results of aggregate functions, as `WHERE` cannot be used with them.
+
+This query finds origin airports with an average departure delay greater than 10 minutes.
+
+```{r having_clause}
+q("SELECT origin, AVG(dep_delay) AS avg_dep_delay FROM flights GROUP BY origin HAVING avg_dep_delay > 10")
+```
+
+### Exercise 5
+
+Find the manufacturers in the `mpg` dataset that have an average city mileage (`cty`) of less than 15.
+
+```{r ex5, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex5-solution}
+q("SELECT manufacturer, AVG(cty) as avg_cty FROM mpg GROUP BY manufacturer HAVING AVG(cty) < 15")
+```
+
+### Exercise 6: Ordering Results
+
+The `ORDER BY` keyword is used to sort the result-set in ascending or descending order.
+
+Find the top 5 busiest routes (origin-destination pairs) in the `flights` dataset.
+
+```{r ex6, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex6-solution}
+q("SELECT origin, dest, COUNT(*) as num_flights FROM flights GROUP BY origin, dest ORDER BY num_flights DESC LIMIT 5")
+```
+
+## Joins
+
+A `JOIN` clause is used to combine rows from two or more tables, based on a related column between them.
+
+This query joins `flights` and `airports` to get the full name of the destination airport.
+
+```{r join_tables}
+q("SELECT flights.flight, airports.name AS destination_airport FROM flights LEFT JOIN airports ON flights.dest = airports.faa LIMIT 5")
+```
+
+### Exercise 7
+
+Find the 10 oldest planes that had a flight in 2013. Show the plane's `tailnum`, year of manufacture, and the number of flights it had. You will need to join the `flights` and `planes` tables.
+
+```{r ex7, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex7-solution}
+q("
+  SELECT
+    p.tailnum,
+    p.year,
+    COUNT(f.flight) AS num_flights
+  FROM planes p
+  JOIN flights f ON p.tailnum = f.tailnum
+  WHERE p.year IS NOT NULL
+  GROUP BY p.tailnum, p.year
+  ORDER BY p.year ASC
+  LIMIT 10
+")
+```
+
+### Exercise 8: Multi-Table Joins
+
+Find the full name of the airline (`airlines` table) that had the highest average arrival delay. This will require joining `flights` and `airlines`.
+
+```{r ex8, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex8-solution}
+q("
+  SELECT
+    a.name,
+    AVG(f.arr_delay) AS avg_delay
+  FROM flights f
+  JOIN airlines a ON f.carrier = a.carrier
+  GROUP BY a.name
+  ORDER BY avg_delay DESC
+  LIMIT 1
+")
+```
+
+## Advanced Queries
+
+### Subqueries
+
+A subquery is a SQL query nested inside a larger query.
+
+### Exercise 9
+
+Find all flights on the day with the highest number of departures from 'JFK'.
+
+```{r ex9, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex9-solution}
+q("
+  SELECT *
+  FROM flights
+  WHERE origin = 'JFK' AND month = (
+    SELECT month
+    FROM flights
+    WHERE origin = 'JFK'
+    GROUP BY month, day
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+  ) AND day = (
+    SELECT day
+    FROM flights
+    WHERE origin = 'JFK'
+    GROUP BY month, day
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+  )
+  LIMIT 10
+")
+```
+
+### CASE statement
+
+The `CASE` statement goes through conditions and returns a value when the first condition is met.
+
+### Exercise 10
+
+Create a query that categorizes flights based on their `distance`. Categories are 'Short' (< 500 miles), 'Medium' (500-2000 miles), and 'Long' (> 2000 miles). Count the number of flights in each category.
+
+```{r ex10, exercise=TRUE, exercise.setup="lab06-setup"}
+
+```
+
+```{r ex10-solution}
+q("
+  SELECT
+    CASE
+      WHEN distance < 500 THEN 'Short'
+      WHEN distance >= 500 AND distance <= 2000 THEN 'Medium'
+      ELSE 'Long'
+    END AS distance_category,
+    COUNT(*) AS num_flights
+  FROM flights
+  GROUP BY distance_category
+")
+```
+
+## Disconnecting from the database
+
+When you are finished, it is good practice to disconnect from the database.
+
+```{r db_disconnect}
+dbDisconnect(con)
+```
