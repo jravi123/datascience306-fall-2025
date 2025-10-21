@@ -28,6 +28,61 @@ How do we share data?
 * Binary formats - only computers can read
 * Database applications - SQL/NoSQL languages to CRUD (Create, Read, Update, Delete); data is mostly stored in binary format again
 
+## Other Plain Text Formats
+
+Here are examples of what XML, HTML, and JSON file structures look like.
+
+### XML (eXtensible Markup Language)
+
+```xml
+<books>
+  <book>
+    <title>The Lord of the Rings</title>
+    <author>J.R.R. Tolkien</author>
+  </book>
+  <book>
+    <title>Pride and Prejudice</title>
+    <author>Jane Austen</author>
+  </book>
+</books>
+```
+
+### HTML (HyperText Markup Language)
+
+```html
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Author</th>
+  </tr>
+  <tr>
+    <td>The Lord of the Rings</td>
+    <td>J.R.R. Tolkien</td>
+  </tr>
+  <tr>
+    <td>Pride and Prejudice</td>
+    <td>Jane Austen</td>
+  </tr>
+</table>
+```
+
+### JSON (JavaScript Object Notation)
+
+```json
+{
+  "books": [
+    {
+      "title": "The Lord of the Rings",
+      "author": "J.R.R. Tolkien"
+    },
+    {
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen"
+    }
+  ]
+}
+```
+
 ## Plain text delimited formats
 
 * **Plain text** files are the easiest format to share across platforms and software.
@@ -168,6 +223,25 @@ read_csv(csv, na = c('NONE', 'EMPTY'), col_names = F)
 There are complementary `write_csv` and `write_delim` functions.
 
 R has a proprietary format called "RDS". You can use `write_rds` to write a single table or the `save` function to write more than just one variable to a file. This is useful for processing data in a file and then saving it for later use.
+
+**Note:** When you run the code in this exercise, the files will be created in a temporary directory used by the tutorial. They will not be saved to your project folder.
+
+```{r saving-data, exercise = TRUE}
+# Create a sample dataframe
+my_data <- data.frame(
+  name = c("Alice", "Bob", "Charlie"),
+  age = c(25, 30, 35),
+  city = c("New York", "London", "Paris")
+)
+
+# Save as a CSV file
+write_csv(my_data, "my_data.csv")
+
+# Save as an RDS file
+write_rds(my_data, "my_data.rds")
+```
+
+
 
 ## How does parsing work?
 
