@@ -14,6 +14,10 @@ library(tidyverse)
 library(nycflights13)
 ```
 
+```{r lecture14-setup, include=FALSE}
+gss18 <- read_csv('data/gss18.csv')
+```
+
 ## Strings and Factors
 
 R has two data types for representing categorical data:
@@ -64,7 +68,9 @@ To learn the basics, we'll start with a simple example:
 birth_months = c("Jan", "Feb", "Sep", "Sep", "Dec", "Jan", "Jul", "Aug")  # categorical variable
 ```
 
-The `possible` values of a categorical variable are called the `levels`. The levels of `birth_months` are `Jan, Feb, ..., Dec`. The actual values of `birth_months` are just called the `values`.
+- The `possible` values of a categorical variable are called the `levels`. 
+- The levels of `birth_months` are `Jan, Feb, ..., Dec`. 
+- The actual values of `birth_months` are just called the `values`.
 
 To create a factor, we must specify the levels and the values:
 
@@ -73,7 +79,7 @@ month.abb
 ```
 
 ```{r}
-birth_months_fac = factor(birth_months, levels=month.abb) |> print()
+birth_months_fac = factor(birth_months, levels = month.abb) |> print()
 ```
 
 ## Significance of levels
@@ -81,6 +87,7 @@ birth_months_fac = factor(birth_months, levels=month.abb) |> print()
 If you don't specify the levels, R will infer them based on all the observed values of the variable:
 
 ```{r}
+birth_months
 factor(birth_months) |> str()
 ```
 
@@ -90,7 +97,7 @@ It's best to be explicit about the factor levels. This way, if there are typos o
 bad = c("Jan", "Feb", "Sep", "Ser", "Dec", "Jan", "Jul", "Aug")
 #                               ^ note typo
 # factor(bad)
-factor(bad, levels=month.abb)
+factor(bad, levels = month.abb)
 ```
 
 
@@ -107,7 +114,7 @@ sort(birth_months)
 sort(birth_months_fac)
 ```
 
-If you specify the factor levels using the `levels=` option, then that will specify the default order. If you do not specify the levels, then they will be sorted alphabetically by default.
+If you specify the factor levels using the `levels =` option, then that will specify the default order. If you do not specify the levels, then they will be sorted alphabetically by default.
 
 ## `levels` function
 You can get the levels of a factor using the `levels` function:
@@ -160,18 +167,17 @@ ggplot(relig_summary, aes(x = tvhours, y = relig)) +
   geom_point()
 ```
 
-It is hard to read this plot because there’s no overall pattern. We can use `fct_reorder` to improve this. It takes three arguments:
+It is hard to read this plot because there’s no overall pattern. We can use `fct_reorder` to improve this. It takes two arguments:
 
 * `.f`, the factor whose levels you want to modify.
 * `.x`, a numeric vector that you want to use to reorder the levels.
 
 
 ```{r}
-ggplot(relig_summary, aes(x = tvhours, y = fct_reorder(relig, tvhours))) +
-  geom_point()
+ggplot(relig_summary, aes(x = tvhours, y = fct_reorder(relig, tvhours))) + geom_point()
 ```
 
-A cleaner way of writing this would be:
+You could also convert the existing values and then plot:
 
 ```{r}
 relig_summary |>
@@ -188,8 +194,7 @@ relig_summary |>
 Fix the chart below to make it more easily readable by showing the bars arranged from highest to lowest count. This will make the chart easier to interpret.
 
 
-```{r bar-reorder, exercise = TRUE}
-gss18 <- read_csv('data/gss18.csv')
+```{r bar-reorder, exercise = TRUE, exercise.setup = "lecture14-setup"}
 gss18 |> count(income) |> ggplot(aes(y = income, x = n)) + geom_col()
 ```
 
@@ -233,7 +238,7 @@ gss_cat |>
   geom_bar()
 ```
 
-Combine it with `fct_rev()` if you want them in increasing frequency so that in the bar plot, the largest values are on the right, not the left.
+Combine it with `fct_rev()` if you want them in increasing frequency.
 
 ```{r}
 gss_cat |>
@@ -340,7 +345,7 @@ gss18 |> ggplot() + geom_histogram(aes(x = age))
 
 The oldest person was born in which year?
 
-```{r oldest-person, exercise=TRUE}
+```{r oldest-person, exercise=TRUE, exercise.setup = "lecture14-setup"}
 
 ```
 
@@ -359,9 +364,9 @@ Let's define the following generations:
 
 ```{r}
 gss18_gen <- mutate(gss18, birth_year = 2018 - age, 
-                    generation = cut(birth_year, 
-                                     breaks = c(1929, 1946, 1964, 1982, 1997, 2014), 
-                                     labels=c('silent', 'boomer', 'x', 'millennial', 'z')))
+                generation = cut(birth_year, 
+                    breaks = c(1929, 1946, 1964, 1982, 1997, 2014), 
+                    labels=c('silent', 'boomer', 'x', 'millennial', 'z')))
 ```
 
 ```{r}
