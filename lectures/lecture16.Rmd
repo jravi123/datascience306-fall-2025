@@ -200,7 +200,7 @@ ch1 |> str_count('\\bH\\w')
 
 In this exercise, we matched the pattern
 
-`<word boundary><character H><any number of word characters (*)>`
+`<word boundary><character H><any other word character>`
 
 
 ## Quantifiers
@@ -357,5 +357,5 @@ head(str_match(words, '(.).*(.)'))
 `str_replace(v, re, rep)` will replace each match of `re` in `v` with `rep`. The most basic usage is as a sort of "find and replace":
 
 ```{r}
-str_replace('Give me liberty or give me death', '\\w+', 'pizza')
+str_replace('Give me liberty or give me death', 'death', 'pizza')
 ```
