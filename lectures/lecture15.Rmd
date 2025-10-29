@@ -1,6 +1,6 @@
 ---
 subtitle: "DATASCI 306: Lecture 15"
-title: "Strings, Text Data, and Dates/Times"
+title: "Strings and Text Data"
 output: 
   learnr::tutorial:
     progressive: true
@@ -15,7 +15,7 @@ library(tidyverse)
 library(nycflights13)
 set.seed(2939394)
 library(remotes)
-remotes::install_github("bradleyboehmke/harrypotter")
+# remotes::install_github("bradleyboehmke/harrypotter")
 library(harrypotter)
 ```
 
@@ -24,7 +24,6 @@ library(harrypotter)
 * Understand the basics of working with strings in R.
 * Convert data to strings.
 * Extract data from strings.
-* Using dates and times.
 
 These notes correspond to Chapters 14 and 17 of your book.
 

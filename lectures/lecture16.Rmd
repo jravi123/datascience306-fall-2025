@@ -39,9 +39,11 @@ Gosh, too many escape sequences make it confusing!
 Instead, let's construct `raw` strings using `r`: 
 
 ```{r}
-simple <- r"(double_quote <- \"\"\" # or '\"' single_quote <- '\\'' # or \"'\")"
+simple <- r"(double_quote <- "\"" # or '"' single_quote <- '\'' # or "'")"
 cat(simple)
 ```
+
+Using `r` essentially tells R: "Take the text inside these delimiters exactly as you see it. Do not interpret any character as special."
 
 ## Regular expressions
 
@@ -185,14 +187,14 @@ str_view(c("Rafael Nadal", "Roger Federer", "Novak Djokovic"), "\\b")
 Every word has a word boundary on either side, so we can use this in combination with other character classes to match certain kinds of words in text.
 
 ## Exercise
-About how many words start with 'H' in Chapter 1?
+About how many words start with 'H' in Chapter 1? Explore using `str_count`
 
 ```{r starts_with, exercise = TRUE}
 
 ```
 
 ```{r starts_with-solution}
-ch1 |> str_count('\bH\w*')
+ch1 |> str_count('\\bH\\w')
 ```
 
 
