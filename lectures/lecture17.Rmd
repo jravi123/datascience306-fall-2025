@@ -14,7 +14,7 @@ library(tidyverse)
 library(nycflights13)
 ```
 
-# Dates 
+## Dates 
 Most of us have a pretty firm grasp of dates, but they can be more complicated than you might think. Consider these three questions from the book:
 
 * Does every year have 365 days?
@@ -114,7 +114,9 @@ ymd_hm(dt2)
 Sometimes you can get away with calling `as_datetime()`:
 
 ```{r}
-as_datetime("2017-01-02 20:11:59")
+my_date <- as_datetime("2017-01-02 20:11:59")
+print(my_date)
+month(my_date, label = T, abbr = F)
 ```
 
 But not always:
@@ -122,19 +124,26 @@ But not always:
 as_datetime("01-02-2017 20:11:59")
 ```
 
-## `parse_datetime`
-Another convenience function to use when `as_datetime` fails is `parse_datetime`:
+
+
+## `parse_date_time`
+
+But a better function for String represented dates is `parse_date_time`:
 
 ```{r}
-parse_datetime("22/10/1, 10:01:00", 
-               format = "%y/%m/%d, %H:%M:%S")
+parse_date_time("22/10/1, 10:01:00", orders = "ymd HMS")
 ```
 
->* Year: four digit `"%Y"`, two digit `"%y"`
->* Month: number `"%m"`, abbreviation `%b`, full name `%B`
->* Day: number in month `"%d"`
->* Hours:minutes:seconds: `"%H:%M:%S"`
+>* Year: four digit `"Y"`, two digit `"y"`
+>* Month: number `"m"`, abbreviation `b`, full name `B`
+>* Day: number in month `"d"`
+>* Hours:minutes:seconds: `"HMS"`
 >* See the `parse_datetime` documentation for more.
+
+Another example
+```{r}
+parse_date_time("2023 Jan 01, 12:00:00", "Y b d, H:M:S")
+```
 
 ## using `make_date` and `make_datetime`
 
@@ -166,11 +175,11 @@ as_datetime(3600 * 24)  # 24 hours after the epoch
 
 ```{r}
 right_now <- now()
-day(right_now) # same as mday()
-month(right_now)
-year(right_now)
+day(right_now) # has an alias - mday()
 yday(right_now) # day within year ("Julian date")
 wday(right_now) # day within week, starting with Sunday
+month(right_now)
+year(right_now)
 hour(right_now)
 minute(right_now)
 second(right_now)
@@ -198,28 +207,29 @@ After doing math, you might want to convert the units:
 
 ```{r}
 # Days to the last day of class!
-semester_end <- dmy_hms("10122025 23:59:59") - now()
+semester_end <- dmy_hms("08122025 23:59:59") - now()
 # A `difftime` object is returned.
+semester_end
 
 sed <- as.duration(semester_end)
 
 as.integer(sed, "days")
 as.numeric(sed, "minutes")
-
 ```
-You can use the `update` function to update a specific part of the date:
-
-```{r}
-(d = today() - update(today(), day = 26))
-```
-
-## Durations
-There are equivalent `d*` functions (`dyears`, etc.) for constructing durations directly.
 
 Any time part can be converted to seconds using the duration class:
 
 ```{r}
 as.duration(1234)
+```
+
+
+## Durations
+There are equivalent `d*` functions (`dyears`, etc.) for constructing durations directly.
+
+
+
+```{r}
 dseconds(10)
 dweeks(3)
 ```
@@ -239,18 +249,18 @@ You have to be careful when adding durations and dates. What is one day after Ma
 
 ```{r}
 # But what happened to this addition?
-march8 = mdy_hm("March. 8, 2025 13:00PM", tz="America/Detroit")
+march8 = mdy_hm("March. 8, 2025 13:00PM", tz = "America/Detroit")
 march8 + ddays(1)
 
 # this seems fine
-march9 = mdy_hm("March. 9, 2025 13:00PM", tz="America/Detroit")
+march9 = mdy_hm("March. 9, 2025 13:00PM", tz = "America/Detroit")
 march9 + ddays(1)
 ```
 
 You can use period methods from `lubridate` instead:
 
 ```{r}
-march8 = mdy_hm("March. 8, 2025 13:00PM", tz="America/Detroit")
+march8 = mdy_hm("March. 8, 2025 13:00PM", tz = "America/Detroit")
 march8 + days(1)
 
 ```
@@ -285,9 +295,9 @@ median(ds_parsed)
 
 # setting reminders
 ## method 1
-year_diff <- year(today()) - year(ds_parsed)
-ds_this_year <- ds_parsed + years(year_diff) - months(1)
-if_else(ds_this_year < today(), ds_this_year + years(1), ds_this_year) 
+ds_parsed2 = ds_parsed - months(1)
+year(ds_parsed2) = year(now())
+if_else(ds_parsed2 < now(), ds_parsed2 + years(1), ds_parsed2)
 
 ## method 2
 ds_parsed_2 <- ds_parsed - months(1)
@@ -412,21 +422,18 @@ ggplot(sched_dep, aes(minute, avg_delay)) +
 
 ## Summary
 
-In this lecture, we covered the basics of working with strings and dates in R.
+In this lecture, we covered the basics of working with dates in R.
 
-Key `stringr` functions:
-* `str_c()`: to combine strings.
-* `str_length()`: to get the length of strings.
-* `str_sub()`: to extract or modify substrings.
-* `str_split()`: to split strings into pieces.
-* `str_count()`: to count occurrences of a pattern.
-* `str_starts()`: to check if a string starts with a pattern.
 
 Key `lubridate` functions:
-* `today()`, `now()`: to get the current date and time.
-* `ymd()`, `mdy()`, `dmy()` and their `_hms` variants: to parse strings into dates and times.
-* `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`: to extract components from dates and times.
-* `duration` and `period` functions (e.g., `ddays()`, `days()`): for robust arithmetic with dates.
+
+> `today()`, `now()`: to get the current date and time.
+
+> `ymd()`, `mdy()`, `dmy()` and their `_hms` variants: to parse strings into dates and times.
+
+> `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`: to extract components from dates and times.
+
+> `duration` and `period` functions (e.g., `ddays()`, `days()`): for robust arithmetic with dates.
 
 
 
