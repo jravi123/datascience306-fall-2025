@@ -255,16 +255,10 @@ map(samples, max)
 ```
 
 What was the largest magnitude?
-```{r}
-## version 1
-map(samples, ~ max(abs(.x)))
-```
-Recall: `~ ... operations on .x ...` is equivalent to 
-```{r eval = F}
-function(.x) { ... .x ...}
-```
+
 
 ```{r}
+# version 1
 get_max <- function(x){
   max(abs(x))
 }
@@ -303,8 +297,8 @@ map(v, pow_2)
 
 Use `map` that takes `flights` dataframe and:
 
-* Return a short summary in the form of the mean, median, and standard deviation if it is `numeric`.
-* Return the class of the object otherwise
+* Return a short summary of each column;  the mean, median, and standard deviation for numeric etc.
+
 
 
 ```{r mapsummary, exercise = TRUE}
