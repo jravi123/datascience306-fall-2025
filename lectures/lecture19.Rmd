@@ -255,7 +255,7 @@ The first dataset that we will use to practice regression comes from the e-book 
 
 ![](images/cpu.jpeg){#id .class width=40%}
 ```{r}
-load(url('https://datasets.stats306.org/cpus.RData'))
+#load(url('https://datasets.stats306.org/cpus.RData'))
 ```
 
 **Available Dataframes**
@@ -266,7 +266,7 @@ load(url('https://datasets.stats306.org/cpus.RData'))
 We will use `int00.dat` in this lesson. Now, let's take a look at the first few records of this dataframe.
 
 ```{r}
-int00.dat |> head()
+# int00.dat |> head()
 ```
 
 ...and so on.
@@ -274,8 +274,8 @@ int00.dat |> head()
 ## Investigate `nperf` and `perf`
 
 ```{r}
-int00.dat$nperf |> range()
-int00.dat$perf |> range()
+#int00.dat$nperf |> range()
+#int00.dat$perf |> range()
 ```
 
 And the variables are:
@@ -304,7 +304,7 @@ Let's do some EDA.
 `perf` measures performance, and `clock` measures clock speed. Are they linearly related?
 
 ```{r}
-ggplot(int00.dat) + geom_point(aes(x = clock, y = perf))
+# ggplot(int00.dat) + geom_point(aes(x = clock, y = perf))
 ```
 Let's consider the simple model:
 
@@ -313,20 +313,20 @@ Let's consider the simple model:
 To find the best-fitting `$a_0 and `$a_1, regress `perf` on `clock` using `lm()`.
 
 ```{r}
-int00.lm <- lm(perf ~ clock, data = int00.dat)
-int00.lm
+#int00.lm <- lm(perf ~ clock, data = int00.dat)
+#int00.lm
 ```
 We can use `geom_smooth()` to plot the regression line atop the data:
 
 ```{r}
-ggplot(int00.dat, aes(x = clock, y = perf)) + geom_point() + geom_smooth(method = "lm")
+#ggplot(int00.dat, aes(x = clock, y = perf)) + geom_point() + geom_smooth(method = "lm")
 ```
 ## Summary
 
 Now, let's summarize the regression:
 
 ```{r}
-summary(int00.lm)
+# summary(int00.lm)
 ```
 
 **Model fit**
@@ -338,8 +338,8 @@ summary(int00.lm)
 Next, let's visualize the residuals:
 
 ```{r}
-int00.dat |> add_residuals(int00.lm) |> ggplot() +
-  geom_histogram(aes(x=resid))
+#int00.dat |> add_residuals(int00.lm) |> ggplot() +
+ # geom_histogram(aes(x=resid))
 ```
 
 As you could probably already guess from looking at the plot of `perf` vs. `clock`, the residuals do not appear to be normally distributed.
@@ -349,8 +349,8 @@ As you could probably already guess from looking at the plot of `perf` vs. `cloc
 Next, let's consider a plot of the residuals versus the fitted values:
 
 ```{r}
-int00.dat |> add_residuals(int00.lm) |> add_predictions(int00.lm) |>
-    ggplot() + geom_point(aes(x = resid, y = pred))
+#int00.dat |> add_residuals(int00.lm) |> add_predictions(int00.lm) |>
+ #   ggplot() + geom_point(aes(x = resid, y = pred))
 ```
 
 The linear model says that after accounting for the predictors, the remaining variation should look like pure noise. So:
@@ -371,10 +371,10 @@ But here we see that:
 What explains the weird patterns we're seeing in the data and residuals? Hint:
 
 ```{r}
-int00.dat |> 
-    ggplot(
-        aes(x = clock, y = perf, color = factor(cores))
-    ) + geom_point()
+# int00.dat |> 
+#    ggplot(
+#        aes(x = clock, y = perf, color = factor(cores))
+#    ) + geom_point()
 ```
 
 In the next lecture, we'll talk about multiple linear regression, which lets us take into account multiple predictors at a time.
