@@ -252,6 +252,11 @@ If the linear model is correct, we would expect residual values that are normall
 
 The Residuals section of the linear model summary shows us these statistics.
 
+*Residual Standard error* is the total variation in the residual values.
+
+If the residuals are distributed normally, the first and third quantiles of the
+residuals should be about 1.5 times this standard error.
+
 ## Residual distribution
 
 We expect the distribution of the residuals to be `normal`
@@ -377,6 +382,7 @@ We can use geom_smooth() to plot the regression line atop the data:
 ```{r}
 ggplot(int00.dat, aes(x = clock, y = perf)) + geom_point() + geom_smooth(method = "lm")
 ```
+
 ## Summary
 
 Now let's summarize the regression:
@@ -406,7 +412,7 @@ Next let's consider a plot of the residuals versus the fitted values:
 
 ```{r}
 int00.dat |> add_residuals(int00.lm) |> add_predictions(int00.lm) |>
-    ggplot() + geom_point(aes(x = resid, y = pred))
+    ggplot() + geom_point(aes(x = resid, y = pred, color = clock))
 ```
 
 The linear model says that, after accounting for the predictors, the remaining variation should look like pure noise. So:

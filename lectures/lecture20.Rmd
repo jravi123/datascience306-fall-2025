@@ -436,6 +436,7 @@ ggplot(titanic_df) + geom_bar(
       fill = Survived), 
   position = 'dodge') + coord_flip()
 ```
+
 We have three categorical predictors: `Sex`, `Age` (adult/child), and `Class` (1st, 2nd, 3rd, or Crew). Our outcome is also categorical: survived or not.
 
 ## Logistic regression
