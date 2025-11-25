@@ -126,7 +126,7 @@ Each of the terms in brackets (e.g., `{x=b}`) is equal to 1 if the corresponding
 In fact, we can use a command called `model_matrix()` to show the actual predictors that R has used when performing this regression:
 
 ```{r}
-sim2 %>% model_matrix(y ~ x) %>% head()
+sim2 %>% model_matrix(y ~ x)
 ```
 
 ## Coefficients
@@ -172,6 +172,7 @@ Just like with simple linear regression, we want to find the best coefficients $
 ```{r}
 ggplot(int00.dat, aes(x = clock, y = perf)) + geom_point() + geom_smooth(method = "lm")
 ```
+
 By examining various regression diagnostics, such as the residuals, we argued that the simple linear model `perf ~ clock` was not rich enough to accurately explain all of the variation in `perf`.
 
 Now, we will use multiple linear regression to add more predictors and improve the fit.
@@ -292,11 +293,11 @@ Here is the potential list of predictors we can start with:
 * `channel`
 * `FO4delay`
 * `L1icache`
-* `$\sqrt{L1icache}
+* $\sqrt{L1icache}$
 * `L1dcache`
-* `$\sqrt{L1dcache}
+* $\sqrt{L1dcache}$
 * `L2cache`
-* `$\sqrt{L2cache}
+* $\sqrt{L2cache}$
 
 This initial list has been guided by domain knowledge:
 
