@@ -49,11 +49,7 @@ titanic_df |> add_predictions(mdl)
 ```
 
 
-What is the mean value of male and female passengers?
 
-```{r}
-titanic_df |> add_predictions(mdl)  |> group_by(Sex) |> summarize(mean = mean(pred))
-```
 ## log-odds
 
 Although these results look similar to linear regression, their interpretation is quite different. Specifically, they are interpreted in terms of their effect on the *log-odds* ratio.

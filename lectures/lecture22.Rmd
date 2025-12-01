@@ -136,15 +136,8 @@ or
 
 `setwd('/cloud/project/lectures/shiny_example_apps/shiny-project-er-injuries')` using absolute path
 
-## Example 1
 
-Let us now understand the ncaa project. The code is part of this repository under 
-
-shiny_example_apps/shiny-project-ncaa
-
-
-
-## Example 2
+## Example 
 
 shiny_example_apps/shiny-project-er-inuries
 
